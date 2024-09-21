@@ -37,15 +37,11 @@ def calculate_snow_load_shape_coeff_pitched(α_1=0, α_2=0):
     return μ_1_α_1, μ_1_α_2
 
 
-print(calculate_snow_load_shape_coeff_pitched())
-
-
-#  Snow loads on roofs for the persistent/transient design situations:
-def calculate_snow_loads(α=55, C_e=1, C_t=1, S_k=1550):
+# Snow load on roofs for the persistent/transient design situations:
+def calculate_snow_loads(α=0, S_k=1550, C_e=1, C_t=1):
     μ_i = calculate_snow_load_shape_coeff_monopitch(α)
-    print(μ_i, S_k)
     S = μ_i * C_e * C_t * S_k
 
-    return f"{S/1000} kH/m2"
+    return f"Snow load on roofs for the persistent/transient design situations: S = {round(S/1000, 3)} kH/m2"
 
-print(calculate_snow_loads())
+print(calculate_snow_loads(30, 1550))
