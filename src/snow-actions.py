@@ -70,20 +70,23 @@ def calculate_snow_load_shape_coeff_multispan(α_1=0, α_2=0):
     return μ_1_α_1, μ_1_α_2, μ_2_α
 
 # Calculate the snow load shape coefficient μ_1 and μ_2 for the Multi-span roofs according to the National Annex of Ukraine:
-def calculate_snow_load_shape_coeff_multispan_ua(α_1=0):
-    #cases = ['Case ii', 'Case iii']
+def calculate_snow_load_shape_coeff_multispan_ua(α_1=15, h=1, b1=4, b2=6, b3=20, S_k=1.55):
+    #cases = ['Case B1', 'Case iii']
     cases = ['Case iii']
     random_case = random.choice(cases)
     if random_case == 'Case iii':
         # Snow load shape coefficient for end spans
         μ1_end = 0.6 * calculate_snow_load_shape_coeff(α_1)
-
         # Snow load shape coefficient for middle spans(the drifted load arrangement)
         μ1_middle = 1.4 * calculate_snow_load_shape_coeff(α_1)
-    else:
-        pass
+    #elif random_case == 'Case B1':
+        # The shape factor is defined as the smallest value among:
+        μ1_1 = 2 * h / S_k
+        μ1_2 = 2 * b3 / (b1 + b2)
+        μ1_3 = 5
+        μ1 = min([μ1_1, μ1_2 , μ1_3])
     
-    return μ1_end, μ1_middle
+    return μ1_end, μ1_middle, μ1
 
 
 # Snow load on roofs for the persistent/transient design situations:
@@ -119,9 +122,10 @@ def calculate_snow_loads(α=0, S_k=1550, C_e=1, C_t=1):
     S_multispan_α = μ_2_α * C_e * C_t * S_k
 
     # Calculate Snow load for the Multi-span roofs according to the National Annex of Ukraine(case iii)
-    μ1_end, μ1_middle = calculate_snow_load_shape_coeff_multispan_ua(30)
+    μ1_end, μ1_middle, μ1_valleys = calculate_snow_load_shape_coeff_multispan_ua(30)
     S_multispan_end = μ1_end * C_e * C_t * S_k
     S_multispan_middle = μ1_middle * C_e * C_t * S_k
+    S_multispan_valleys = μ1_valleys * C_e * C_t * S_k
     
     return f"""Snow load on Monopitch roofs for the persistent/transient design situations:
 S = {round(S_monopitch/1000, 3)} kH/m2;
@@ -136,7 +140,11 @@ Snow load on Multi-span roofs for the persistent/transient design situations:
 S_μ1(α1) = {round(S_multispan_α_1/1000, 3)} kH/m2; S_μ1(α2) = {round(S_multispan_α_2/1000, 3)} kH/m2; ; S_μ2(α) = {round(S_multispan_α/1000, 3)} kH/m2;
 
 Snow load on Multi-span roofs according to the National Annex of Ukraine:
+Case iii:
 S_μ1(end) = {round(S_multispan_end/1000, 3)} kH/m2; S_μ1(middle) = {round(S_multispan_middle/1000, 3)} kH/m2;
+Case B1:
+μ1(valleys) = {round(μ1_valleys, 3)}
+S_μ1(valleys) = {round(S_multispan_valleys/1000, 3)} kH/m2;
     """
 
 print(calculate_snow_loads())
